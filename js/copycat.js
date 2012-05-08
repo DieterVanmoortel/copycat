@@ -4,7 +4,6 @@
     attach: function(context) { 
       copycat_init();
       $('#copycat-trigger').live('click', copycat_get_form);
-      $('#copycat-form .form-submit').live('click', copycat_process_form);
     }}
 
   function copycat_init() {  
@@ -31,20 +30,12 @@
           nid : nid
         },
         success : function(data) {
+          console.log(data);
           $('.copycat').find('.field-item').html(data).unwrap();
           $('body').addClass('copycat-active');
         }
       });
     }
-  }
-  function copycat_process_form(el){
-    console.log('submit!');
-    var copy = $('#copycat-form #edit-copy').text();
-  }
-  function copycat_cancel_form(el){
-    var copy = $('#copycat-form #old_value').text();
-    $('#copycat-form').html(copy);
-    $('body').removeClass('copycat-active');
   }
 })(jQuery);
 
