@@ -30,21 +30,24 @@ function copycat_edit(){
   $copy = isset($_GET['copy']) ? $_GET['copy'] : FALSE;
   $nid = isset($_GET['nid']) ? $_GET['nid'] : FALSE;
   switch($op) {
-    case 'get-form':
+    case 'get-form': 
       $form = drupal_get_form('copycat_form', array($copy, $nid));
       $form = drupal_render($form);
-      exit($form);
+      return $form;
       break;
+    default:
+      $form = drupal_get_form('copycat_form', array('test', 19));
+      $form = drupal_render($form);
+      return($form);
   }
   
 }
 
 function copycat_form($form_state, $args){
-  $form['copy'] = array(
+ $form['copy'] = array(
       '#type' => 'textarea',
       '#rows' => 2,
       '#default_value' => $args['build_info']['args'][0][0],
-
   );
   $form['original_copy'] = array(
       '#type' => 'value',
@@ -55,29 +58,41 @@ function copycat_form($form_state, $args){
       '#value' => $args['build_info']['args'][0][1],
   );
   $form['submit'] = array(
-      '#type' => 'button',      
-      '#value' => t('Submit'),
+      '#type' => 'button',
+      '#value' => t('Save changes'),
       '#ajax' => array(
-      'callback' => 'ajax_replace_form_callback',
-      'wrapper' => 'copycat-form',
-      'name' => 'submit1',
-      'event' => 'click',
+        'callback' => 'ajax_replace_form_callback',
+        'name' => 'submit_ajax',
+        'event' => 'click',
     ),
-      
   );
-  // is this is an ajax callback, add line below :
-  $form['#post_render'][] = 'show_copy_value';
+
+
   return $form;
 }
 
-function ajax_replace_form_callback($form, $form_state) {
+function ajax_replace_form_callback(&$form, &$form_state) {
   $commands = array();
-//  $commands[] = ajax_command_replace('#copycat-form', '<p>' . $form_state['values']['copy'] .'</p>');
+  $commands[] = ajax_command_replace('#copycat-form', '<div>'.$form_state['values']['copy'].'</div>');
   return array('#type' => 'ajax', '#commands' => $commands);
+
 }
 
-function show_copy_value($html, $form){
-  dpm($form);
-  return('this is a test');
-  exit( $form['copy']['#value'] );
+function copycat_preprocess_page(&$vars){
+  if(arg(0) == 'copycat'){
+    $vars['theme_hook_suggestion'] = "copycat_content_only";
+  }
+}
+
+/**
+ * Implementing hook_theme
+ * @return type
+ */
+function copycat_theme() {
+  $info = array();
+  $info["copycat_content_only"] = array(
+    'template' => 'copycat_content_only',
+    'path' => drupal_get_path('module', 'copycat'),
+  );
+  return $info;
 }
