@@ -17,7 +17,7 @@ function copycat_permission(){
  */
 function copycat_menu(){
   $items = array();
-  $items['copycat'] = array(
+    $items['ajax/copycat'] = array(
     'page callback' => 'copycat_edit',
     'access arguments' => array('use copycat'),
     'type' => MENU_CALLBACK,
@@ -26,58 +26,5 @@ function copycat_menu(){
 }
 
 function copycat_edit(){
-  $op = isset($_GET['op']) ? $_GET['op'] : FALSE;
-  $copy = isset($_GET['copy']) ? $_GET['copy'] : FALSE;
-  $nid = isset($_GET['nid']) ? $_GET['nid'] : FALSE;
-  switch($op) {
-    case 'get-form':
-      $form = drupal_get_form('copycat_form', array($copy, $nid));
-      $form = drupal_render($form);
-      exit($form);
-      break;
-  }
   
-}
-
-function copycat_form($form_state, $args){
-  $form['copy'] = array(
-      '#type' => 'textarea',
-      '#rows' => 2,
-      '#default_value' => $args['build_info']['args'][0][0],
-
-  );
-  $form['original_copy'] = array(
-      '#type' => 'value',
-      '#value' => $args['build_info']['args'][0][0],
-  );
-  $form['nid'] = array(
-      '#type' => 'value',
-      '#value' => $args['build_info']['args'][0][1],
-  );
-  $form['submit'] = array(
-      '#type' => 'button',      
-      '#value' => t('Submit'),
-      '#ajax' => array(
-      'callback' => 'ajax_replace_form_callback',
-      'wrapper' => 'copycat-form',
-      'name' => 'submit1',
-      'event' => 'click',
-    ),
-      
-  );
-  // is this is an ajax callback, add line below :
-  $form['#post_render'][] = 'show_copy_value';
-  return $form;
-}
-
-function ajax_replace_form_callback($form, $form_state) {
-  $commands = array();
-//  $commands[] = ajax_command_replace('#copycat-form', '<p>' . $form_state['values']['copy'] .'</p>');
-  return array('#type' => 'ajax', '#commands' => $commands);
-}
-
-function show_copy_value($html, $form){
-  dpm($form);
-  return('this is a test');
-  exit( $form['copy']['#value'] );
 }
