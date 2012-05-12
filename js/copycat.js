@@ -1,28 +1,5 @@
 (function($){
-Drupal.behaviors.easyedits = {
-  attach: function(context) {
-    $('.easyedits-wrapper', context)
-    .not('.easyedits-processed')
-    .addClass('easyedits-processed')
-    .each(this.exec);
-  },
-  exec: function() {
-    // @todo: Click sucks, consider making it focusable.
-    $('.easyedits-output', this).bind('click', Drupal.behaviors.easyedits.activate);
-  },
-  activate: function() {
-    // @todo: Clean up.
-    var $output = $(this),
-        $form = $output.next('.easyedits-form'),
-        $wrap = $output.parent();
-    $output.toggleClass('element-invisible');
-    // @todo: find a reliable way to trigger focus
-    $form.toggleClass('element-invisible');
-    // Add 'active' identifier
-    // @todo: this will explode with multiple on the same page
-    $wrap[0].id = 'easyedits-active-wrapper';
-  }
-};
+
   Drupal.behaviors.copycat = {
     attach: function(context) { 
       copycat_init();
@@ -31,13 +8,13 @@ Drupal.behaviors.easyedits = {
     }}
   // set the hover event on the desired fields
   function copycat_init() {  
-    $('.field-name-body').each(function(){$(this).prepend('<div id="copycat-trigger"></div>')});
+    $('.field-name-body .field-item').hover( enable_copycat_trigger, disable_copycat_trigger);
   }
   // enable triggering
   function enable_copycat_trigger(el){
-//    if(!$(this).parent().hasClass('copycat')) {
-      console.log($(this).val());
-//    } 
+    if(!$(this).parent().hasClass('copycat')) {
+      $(this).prepend('<div id="copycat-trigger"></div>').wrap('<div class="copycat" />');
+    } 
   }
   // disable triggering
   function disable_copycat_trigger(el){
@@ -48,33 +25,37 @@ Drupal.behaviors.easyedits = {
   // get the edit form and replace content
   function copycat_get_form(el) {
     console.log('get form');
-//    if(!$('body').hasClass('copycat-active')){
-//      var nid = $('.copycat').parents('.node').attr('id').replace('node-','');
+    if(!$('body').hasClass('copycat-active')){
+      $('#copycat-trigger').remove();
+      var copy = $('.copycat').find('.field-item').html();
+      var nid = $('.copycat').parents('.node').attr('id').replace('node-','');
       $.ajax({
         url: '/ajax/copycat/edit',
         data: {
-          nid : 20
+          copy : copy,
+          nid : nid
         },
         success : function(data) {
-          $('.field-name-body').find('.field-item').html(data).unwrap();
-//          $('body').addClass('copycat-active');
+          $('.copycat').find('.field-item').html(data).unwrap();
+          $('body').addClass('copycat-active');
         }
       });
-//    }
+    }
   }
   
   // process the edit form & replace content again
   function copycat_process_form(el){
     console.log('form processing');
     // replace old content with new content
-//    var copy = $('#copycat-value').val();
-//    $('#copycat-form').replaceWith(($('#copycat-value').val()));
+    var copy = $('#copycat-value').val();
+    $('#copycat-form').replaceWith(($('#copycat-value').val()));
     var nid = $('.copycat').parents('.node').attr('id').replace('node-','');
     // and change the value in db
       $.ajax({
         url: '/ajax/copycat/save',
         data: {
-          nid : 20
+          copy : copy,
+          nid : nid
         },
         success : function(data) {
           console.log('succes');
