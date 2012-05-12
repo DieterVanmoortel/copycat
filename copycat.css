@@ -1,1 +1,5 @@
-.copycat{position:relative;}#copycat-trigger{position:absolute;top:0;left:0;height:25px;width:25px;background:transparent url('img/edit.png') no-repeat center center;z-index:999;}#copycat-trigger:hover{cursor:pointer}
+.copycat{position:relative;}
+#copycat-trigger{position:absolute;top:0;left:0;height:100%;width:100%;background:rgba(200,200,200,0.5) url('img/edit.png') no-repeat 5px 5px;z-index:999; opcacity:0.4;}
+#copycat-trigger:hover{cursor:pointer;}
+body.copycat-active #copycat-trigger{width:0;height:0;}
+#copycat-form .hidden{display:none;}

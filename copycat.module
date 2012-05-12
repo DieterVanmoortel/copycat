@@ -17,14 +17,53 @@ function copycat_permission(){
  */
 function copycat_menu(){
   $items = array();
-    $items['ajax/copycat'] = array(
-    'page callback' => 'copycat_edit',
+  $items['ajax/copycat/%'] = array(
+    'page callback' => 'ajax_copycat',
+    'page arguments' => array(2),
     'access arguments' => array('use copycat'),
     'type' => MENU_CALLBACK,
   );
   return $items;
 }
 
-function copycat_edit(){
-  
+function ajax_copycat($type = 'edit') {
+  $copy = isset($_GET['copy']) ? $_GET['copy'] : FALSE;
+  $nid = isset($_GET['nid']) ? $_GET['nid'] : FALSE;
+  switch($type){
+    case 'edit':
+      $form = drupal_get_form('copycat_form', array($copy, $nid));
+      $output = render($form);
+      return drupal_json_output($output);
+    break;
+    case 'test':
+      $form = drupal_get_form('copycat_form', array('example copy text', 20));
+      $output = render($form);
+      return $output;
+    break;
+  case 'save':
+    $node = node_load($nid);
+    // assign value
+    // node_save($node);
+    if($node){return drupal_json_output($node);}
+    break;
+  }
 }
+function copycat_form($form_state, $args){
+  // for now, keeping it simple with a textarea
+  $form['copy'] = array(
+      '#type' => 'textarea',
+      '#rows' => 2,
+      '#default_value' => $args['build_info']['args'][0][0],
+      '#attributes' => array('id' => array('copycat-value')),
+  );
+  $form['nid'] = array(
+      '#type' => 'value',
+      '#value' => $args['build_info']['args'][0][1],
+  );
+  $form['submit'] = array(    
+      '#markup' => '<div id="copycat-submit" class="form-submit">' . t('Submit') . '</div>',
+  );
+  return $form;
+}
+
+
