@@ -1,0 +1,8 @@
+name = Copycat
+description = Inline editting of content
+version = 7.x-dev
+
+package = Administration
+core = 7.x
+stylesheets[all][] = copycat.css
+scripts[] = js/copycat.js

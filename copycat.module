@@ -1,0 +1,93 @@
+<?php
+/*
+ * Implementing hook_permission
+ */
+function copycat_permission(){
+   return array(
+    'use copycat' => array(
+      'title' => t('Edit content inline'), 
+      'description' => t('Use copycat for inline editting.'),
+    ),
+  );
+}
+
+/** Implementing hook_menu
+ *
+ * @return array 
+ */
+function copycat_menu(){
+  $items = array();
+  $items['ajax/copycat/%'] = array(
+    'page callback' => 'ajax_copycat',
+    'page arguments' => array(2),
+    'access arguments' => array('use copycat'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function ajax_copycat($type = 'edit') {
+  $copy = isset($_GET['copy']) ? $_GET['copy'] : FALSE;
+  $nid = isset($_GET['nid']) ? $_GET['nid'] : FALSE;
+  switch($type){
+    case 'edit':
+      if (!function_exists('node_form')) {
+        module_load_include('inc', 'node', 'node.pages');
+      }
+      $node = node_load(20);
+      // Grab the node form.
+      $form = drupal_get_form($node->type . '_node_form', $node);
+      $form = $form['body'];
+      $form['submit'] = array(    
+          '#markup' => '<div id="copycat-submit" class="form-submit">' . t('Submit') . '</div>',
+      );
+      $output = render($form);
+      return drupal_json_output($output);
+    break;
+    case 'test':
+  // This usually isn't loaded as we aren't on the node edit page.
+  if (!function_exists('node_form')) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+  $node = node_load(20);
+  // Grab the node form.
+  $form = drupal_get_form($node->type . '_node_form', $node);
+  dpm($form);
+  $output['body'] = $form['body'];
+  $output['actions'] = $form['actions'];
+  $output['#submit'] = $form['#submit'];
+  $output['#node'] = $form['#node'];
+
+  return render($output);
+    break;
+  case 'save':
+    $output = '';
+    $node = node_load(20);
+    $items = field_get_items('node', $node, 'body');
+    // alter value (?)
+    node_save($node);
+    $output = field_view_field('node', $node, 'body', $items[1]);
+    dpm(render($output));
+    return 'testsave' ;
+    break;
+  }
+}
+function copycat_form($form_state, $args){
+  // for now, keeping it simple with a textarea
+  $form['copy'] = array(
+      '#type' => 'textarea',
+      '#rows' => 2,
+      '#default_value' => $args['build_info']['args'][0][0],
+      '#attributes' => array('id' => array('copycat-value')),
+  );
+  $form['nid'] = array(
+      '#type' => 'value',
+      '#value' => $args['build_info']['args'][0][1],
+  );
+  $form['submit'] = array(    
+      '#markup' => '<div id="copycat-submit" class="form-submit">' . t('Submit') . '</div>',
+  );
+  return $form;
+}
+
+
